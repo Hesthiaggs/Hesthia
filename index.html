@@ -6,8 +6,8 @@
   <meta name="theme-color" content="#101820">
   <meta name="description" content="Sean Causaren — computer science student building a foundation to become an AI engineer.">
   <title>Sean Causaren — Portfolio</title>
- <link rel="stylesheet" href="./styles.css?v=17">
-  <script src="./script.js?v=10" defer></script>
+  <link rel="stylesheet" href="./styles.css?v=18">
+  <script src="./script.js?v=11" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -82,7 +82,7 @@
       <div class="container">
         <div class="section-heading" data-reveal>
           <div>
-            <p class="eyebrow">My Projects</p>
+            <p class="eyebrow">Projects</p>
             <h2 id="projects-title">Learning through making.</h2>
           </div>
           <p class="section-description">Projects that helped me practice problem-solving, build useful tools, and explore familiar experiences.</p>
@@ -223,7 +223,7 @@
     <section class="contact-section" id="contact" aria-labelledby="contact-title">
       <div class="container contact-inner">
         <div data-reveal>
-          <p class="eyebrow">Hello future partners!</p>
+          <p class="eyebrow">Say hello</p>
           <h2 id="contact-title">Let’s build something useful.</h2>
           <p>I’m open to learning, collaborating, and new opportunities.</p>
         </div>
@@ -245,14 +245,15 @@
               </span>
               <span class="social-arrow" aria-hidden="true">↗</span>
             </a>
-            <a class="social-card email-card" href="mailto:seanlevin.causaren1@gmail.com">
+            <button class="social-card email-card" type="button" data-copy-email aria-label="Copy email address">
               <span class="social-icon" aria-hidden="true">@</span>
               <span class="social-content">
                 <span class="social-name">Email</span>
                 <span class="social-address">seanlevin.causaren1@gmail.com</span>
+                <span class="email-copy-status" role="status" aria-live="polite"></span>
               </span>
-              <span class="social-arrow" aria-hidden="true">↗</span>
-            </a>
+              <span class="social-arrow" aria-hidden="true">⧉</span>
+            </button>
           </nav>
           <div class="github-action">
             <a class="button button-primary" href="https://github.com/SeanCausaren-Hesthia?tab=projects" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true">↗</span></a>
@@ -268,6 +269,7 @@
       <a href="#top">Back to top ↑</a>
     </div>
   </footer>
+  <div class="copy-toast" role="status" aria-live="polite" aria-atomic="true"></div>
 </body>
 </html>
 
