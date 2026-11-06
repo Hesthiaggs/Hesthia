@@ -1,4 +1,4 @@
-:root {:root {
+:root {
   color-scheme: dark;
   --page: #101820;
   --page-deep: #0c131a;
@@ -596,4 +596,4 @@ html.has-scroll-reveal [data-reveal].certification-card.is-visible.is-expanded:f
   .card-focus-backdrop { transition: none; }
   .copy-toast { transition: none; }
 }
-}
+
