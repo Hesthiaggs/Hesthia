@@ -168,3 +168,49 @@ expandableCards.forEach((card) => {
   });
   card.addEventListener("focus", () => card.classList.add("is-visible"));
 });
+
+const emailCopyButton = document.querySelector("[data-copy-email]");
+if (emailCopyButton) {
+  const emailAddress = emailCopyButton.querySelector(".social-address")?.textContent?.trim();
+  const copyStatus = emailCopyButton.querySelector(".email-copy-status");
+  let statusTimeout;
+
+  const copyWithFallback = (text) => {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.setAttribute("readonly", "");
+    textArea.style.position = "fixed";
+    textArea.style.opacity = "0";
+    document.body.append(textArea);
+    textArea.select();
+
+    const copied = document.execCommand("copy");
+    textArea.remove();
+    if (!copied) {
+      throw new Error("The browser could not copy the email address.");
+    }
+  };
+
+  emailCopyButton.addEventListener("click", async () => {
+    if (!emailAddress || !copyStatus) {
+      throw new Error("The email copy button is missing its address or status message.");
+    }
+
+    window.clearTimeout(statusTimeout);
+    try {
+      if (navigator.clipboard?.writeText && window.isSecureContext) {
+        await navigator.clipboard.writeText(emailAddress);
+      } else {
+        copyWithFallback(emailAddress);
+      }
+      copyStatus.textContent = "Copied to clipboard";
+    } catch (error) {
+      console.error("Unable to copy the email address.", error);
+      copyStatus.textContent = "Copy failed — select the address above";
+    }
+
+    statusTimeout = window.setTimeout(() => {
+      copyStatus.textContent = "";
+    }, 2500);
+  });
+}
