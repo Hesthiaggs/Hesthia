@@ -173,7 +173,25 @@ const emailCopyButton = document.querySelector("[data-copy-email]");
 if (emailCopyButton) {
   const emailAddress = emailCopyButton.querySelector(".social-address")?.textContent?.trim();
   const copyStatus = emailCopyButton.querySelector(".email-copy-status");
-  let statusTimeout;
+  const copyToast = document.querySelector(".copy-toast");
+  let feedbackTimeout;
+
+  const showCopyFeedback = (message) => {
+    if (!copyStatus || !copyToast) {
+      console.error("Email copy feedback elements are missing.");
+      return;
+    }
+
+    copyStatus.textContent = message;
+    copyToast.textContent = message;
+    copyToast.classList.add("is-visible");
+    window.clearTimeout(feedbackTimeout);
+    feedbackTimeout = window.setTimeout(() => {
+      copyStatus.textContent = "";
+      copyToast.classList.remove("is-visible");
+      copyToast.textContent = "";
+    }, 3000);
+  };
 
   const copyWithFallback = (text) => {
     const textArea = document.createElement("textarea");
@@ -192,25 +210,22 @@ if (emailCopyButton) {
   };
 
   emailCopyButton.addEventListener("click", async () => {
-    if (!emailAddress || !copyStatus) {
-      throw new Error("The email copy button is missing its address or status message.");
+    if (!emailAddress) {
+      console.error("The email copy button is missing its address.");
+      showCopyFeedback("Could not copy the email address.");
+      return;
     }
 
-    window.clearTimeout(statusTimeout);
     try {
       if (navigator.clipboard?.writeText && window.isSecureContext) {
         await navigator.clipboard.writeText(emailAddress);
       } else {
         copyWithFallback(emailAddress);
       }
-      copyStatus.textContent = "Copied to clipboard";
+      showCopyFeedback("Email address copied to clipboard");
     } catch (error) {
       console.error("Unable to copy the email address.", error);
-      copyStatus.textContent = "Copy failed — select the address above";
+      showCopyFeedback("Copy failed — select the email address above");
     }
-
-    statusTimeout = window.setTimeout(() => {
-      copyStatus.textContent = "";
-    }, 2500);
   });
 }
