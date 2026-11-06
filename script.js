@@ -25,9 +25,146 @@ if (menuButton && siteNav) {
   });
 
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") {
+    if (event.key === "Escape" && menuButton.getAttribute("aria-expanded") === "true") {
       closeMenu();
       menuButton.focus();
     }
   });
 }
+
+const revealElements = document.querySelectorAll("[data-reveal]");
+const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+if (revealElements.length && !prefersReducedMotion && "IntersectionObserver" in window) {
+  let observerResponded = false;
+  const revealObserver = new IntersectionObserver((entries, observer) => {
+    observerResponded = true;
+    window.clearTimeout(observerFallback);
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("is-visible");
+        observer.unobserve(entry.target);
+      }
+    });
+  }, {
+    threshold: 0.12,
+    rootMargin: "0px 0px -40px 0px"
+  });
+
+  const observerFallback = window.setTimeout(() => {
+    if (!observerResponded) {
+      revealElements.forEach((element) => element.classList.add("is-visible"));
+      document.documentElement.classList.remove("has-scroll-reveal");
+    }
+  }, 2000);
+
+  document.documentElement.classList.add("has-scroll-reveal");
+  revealElements.forEach((element) => revealObserver.observe(element));
+}
+
+const expandableCards = document.querySelectorAll(".project-card, .certification-card");
+let expandedCard = null;
+let pageScrollPosition = 0;
+const cardBackdrop = document.createElement("div");
+cardBackdrop.className = "card-focus-backdrop";
+cardBackdrop.setAttribute("aria-hidden", "true");
+document.body.append(cardBackdrop);
+
+const closeExpandedCard = (restoreFocus = true) => {
+  if (!expandedCard) {
+    return;
+  }
+
+  const card = expandedCard;
+  card.querySelector(".card-close")?.remove();
+  card.classList.remove("is-expanded");
+  card.setAttribute("role", "button");
+  card.setAttribute("tabindex", "0");
+  card.setAttribute("aria-pressed", "false");
+  card.removeAttribute("aria-modal");
+  card.removeAttribute("aria-label");
+  expandedCard = null;
+  document.body.classList.remove("has-focused-card");
+  window.scrollTo(0, pageScrollPosition);
+
+  if (restoreFocus) {
+    card.focus({ preventScroll: true });
+  }
+};
+
+const expandCard = (card) => {
+  if (expandedCard && expandedCard !== card) {
+    closeExpandedCard(false);
+  }
+
+  pageScrollPosition = window.scrollY;
+  expandedCard = card;
+  card.classList.add("is-visible", "is-expanded");
+  card.setAttribute("role", "dialog");
+  card.setAttribute("tabindex", "-1");
+  card.setAttribute("aria-modal", "true");
+  card.setAttribute("aria-label", card.querySelector("h3")?.textContent?.trim() || "Portfolio item");
+  card.removeAttribute("aria-pressed");
+
+  const closeButton = document.createElement("button");
+  closeButton.className = "card-close";
+  closeButton.type = "button";
+  closeButton.setAttribute("aria-label", "Close expanded item");
+  closeButton.textContent = "×";
+  closeButton.addEventListener("click", (event) => {
+    event.stopPropagation();
+    closeExpandedCard();
+  });
+  card.prepend(closeButton);
+
+  document.body.classList.add("has-focused-card");
+  card.focus({ preventScroll: true });
+};
+
+cardBackdrop.addEventListener("click", () => closeExpandedCard());
+document.addEventListener("keydown", (event) => {
+  if (!expandedCard) {
+    return;
+  }
+
+  if (event.key === "Escape") {
+    event.preventDefault();
+    closeExpandedCard();
+  } else if (event.key === "Tab") {
+    event.preventDefault();
+    const closeButton = expandedCard.querySelector(".card-close");
+    if (event.shiftKey && document.activeElement === closeButton) {
+      expandedCard.focus({ preventScroll: true });
+    } else if (!event.shiftKey && document.activeElement === expandedCard) {
+      closeButton?.focus({ preventScroll: true });
+    } else {
+      expandedCard.focus({ preventScroll: true });
+    }
+  }
+});
+
+expandableCards.forEach((card) => {
+  card.setAttribute("data-expandable-card", "");
+  card.setAttribute("role", "button");
+  card.setAttribute("tabindex", "0");
+  card.setAttribute("aria-pressed", "false");
+
+  card.addEventListener("click", () => {
+    if (expandedCard === card) {
+      closeExpandedCard();
+    } else {
+      expandCard(card);
+    }
+  });
+  card.addEventListener("keydown", (event) => {
+    if (event.target === card && (event.key === "Enter" || event.key === " ")) {
+      event.preventDefault();
+      if (expandedCard === card) {
+        closeExpandedCard();
+      } else {
+        expandCard(card);
+      }
+    }
+  });
+  card.addEventListener("focus", () => card.classList.add("is-visible"));
+});
